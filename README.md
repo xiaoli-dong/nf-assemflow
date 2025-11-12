@@ -64,5 +64,3 @@ nextflow run xiaoli-dong/nf-assemflow \
 ## Credits
 
 xiaolid-ong/assemflow was originally written by Xiaoli Dong.
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
-# nf-assemflow
