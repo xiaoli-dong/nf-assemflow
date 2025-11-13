@@ -22,7 +22,7 @@ process RASUSA_READS {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-
+    //subsample
     // cannot use gzip contig file as  for polca, otherwise it will hang and never finish
     """
     rasusa reads \\

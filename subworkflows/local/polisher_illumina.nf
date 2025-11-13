@@ -8,7 +8,7 @@ workflow POLISHER_ILLUMINA {
 
     main:
 
-    ch_software_versions = Channel.empty()
+    ch_software_versions = channel.empty()
     contigs = draft_contigs
 
     if (!params.skip_polypolish) {
@@ -67,7 +67,7 @@ workflow RUN_POLYPOLISH {
     short_reads
 
     main:
-    ch_software_versions = Channel.empty()
+    ch_software_versions = channel.empty()
 
     //draft_contigs.view()
     short_reads
@@ -135,7 +135,7 @@ workflow RUN_POLYPOLISH {
     ASSEMBLYSTATS(contigs)
     REFORMATASSEMBLYSTATS(ASSEMBLYSTATS.out.stats)
     stats = REFORMATASSEMBLYSTATS.out.tsv
-   
+
     emit:
     contigs
     stats
@@ -150,7 +150,7 @@ workflow RUN_PYPOLCA {
     short_reads
 
     main:
-    ch_software_versions = Channel.empty()
+    ch_software_versions = channel.empty()
 
     //draft_contigs.view()
     short_reads
@@ -186,12 +186,12 @@ workflow RUN_PYPOLCA {
 
     PYPOLCA(ch_input.reads, ch_input.draft_contigs)
     ch_software_versions = ch_software_versions.mix(PYPOLCA.out.versions.first())
-    
+
     contigs = PYPOLCA.out.corrected_contigs
     ASSEMBLYSTATS(contigs)
     REFORMATASSEMBLYSTATS(ASSEMBLYSTATS.out.stats)
     stats = REFORMATASSEMBLYSTATS.out.tsv
-    
+
 
     emit:
     contigs

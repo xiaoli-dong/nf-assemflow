@@ -10,7 +10,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 //
 // MODULE: nf-core modules
 //
-include { MULTIQC } from '../modules/nf-core/multiqc/main'
+include { MULTIQC } from '../modules/local/multiqc/main'
 
 //
 //local subworkflows
@@ -46,7 +46,6 @@ workflow ASSEMFLOW_SHORT {
         readsList.size() > 0 && readsList.every { it != null && it.exists() && it.size() > 0 }
     }
 
-    
     // assembly
     ASSEMBLE_ILLUMINA(short_reads)
     // zero size contig can cause some of the program such as bakta, mobsuite file
@@ -57,8 +56,8 @@ workflow ASSEMFLOW_SHORT {
     assemblies_collected = PUBLISH_ASSEMBLIES.out.contigs.collect().ifEmpty([]).map { it.collate(2) }
     assemblies_collected.view()
     // Generate samplesheet
-    PUBLISH_SAMPLESHEET(assemblies_collected) 
-    
+    PUBLISH_SAMPLESHEET(assemblies_collected)
+
     //
     // depth report
     //
@@ -74,11 +73,11 @@ workflow ASSEMFLOW_SHORT {
         DEPTH_ILLUMINA(ch_input_depth.reads, ch_input_depth.contigs)
     }
 
-    
+
     if (!params.skip_checkm2) {
         ch_input_checkm2 = contigs.map { _meta, mycontigs -> mycontigs }.collect()
-        .map { 
-            files -> tuple([id: "checkm2"], files) 
+        .map {
+            files -> tuple([id: "checkm2"], files)
         }
         //.view()
         CHECKM2_PREDICT(ch_input_checkm2, params.checkm2_db)

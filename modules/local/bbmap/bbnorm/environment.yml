@@ -4,4 +4,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::medaka=2.1.1
+  - bioconda::bbmap=39.37
+  - pigz=2.8

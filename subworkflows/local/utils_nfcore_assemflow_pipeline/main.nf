@@ -62,7 +62,7 @@ workflow PIPELINE_INITIALISATION {
 
     main:
 
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
@@ -96,8 +96,8 @@ workflow PIPELINE_INITIALISATION {
 
     // Read and parse samplesheet with duplicate validation
     def seen_samples = [] as Set
-    
-    reads = Channel.fromPath(params.input)
+
+    reads = channel.fromPath(params.input)
         .splitText()
         .filter { line -> !line.trim().startsWith('#') && line.trim() != '' }
         .collect()
@@ -108,7 +108,7 @@ workflow PIPELINE_INITIALISATION {
             if (row.sample.startsWith('#')) {
                 return null
             }
-            
+
             // Check for duplicate sample IDs
             if (seen_samples.contains(row.sample)) {
                 error("ERROR: Duplicate sample ID found in samplesheet: '${row.sample}'\n" +
@@ -116,7 +116,7 @@ workflow PIPELINE_INITIALISATION {
                       "Please check your input samplesheet: ${params.input}")
             }
             seen_samples.add(row.sample)
-            
+
             // Return parsed row
             [
                 sample: row.sample,

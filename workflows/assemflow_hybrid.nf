@@ -3,7 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { MULTIQC } from '../modules/nf-core/multiqc/main'
+include { MULTIQC } from '../modules/local/multiqc/main'
 include { paramsSummaryMap } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -11,10 +11,9 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_asse
 include { ASSEMBLE_HYBRID } from '../subworkflows/local/assembly_long'
 include { PUBLISH_ASSEMBLIES } from '../modules/local/publish/assemblies'
 include { PUBLISH_SAMPLESHEET } from '../modules/local/publish/samplesheet'
-//include { ASSEMBLY_AUTOCYCLER            } from '../subworkflows/local/assembly_autocycler'
 include { DEPTH_ILLUMINA } from '../subworkflows/local/depth_illumina'
 include { DEPTH_NANOPORE } from '../subworkflows/local/depth_nanopore'
-include { CSVTK_CONCAT } from '../modules/nf-core/csvtk/concat'
+include { CSVTK_CONCAT } from '../modules/local/csvtk/concat'
 //
 // modules
 //

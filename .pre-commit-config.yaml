@@ -13,7 +13,7 @@ repos:
         exclude: |
           (?x)^(
               .*ro-crate-metadata.json$|
-              modules/nf-core/.*|
+              modules/local/.*|
               subworkflows/nf-core/.*|
               .*\.snap$
           )$
@@ -21,7 +21,7 @@ repos:
         exclude: |
           (?x)^(
               .*ro-crate-metadata.json$|
-              modules/nf-core/.*|
+              modules/local/.*|
               subworkflows/nf-core/.*|
               .*\.snap$
           )$

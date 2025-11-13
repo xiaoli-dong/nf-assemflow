@@ -1,7 +1,7 @@
-name: bwamem2_index
+name: unicycler
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::bwa-mem2=2.2.3
+  - bioconda::unicycler=0.5.1

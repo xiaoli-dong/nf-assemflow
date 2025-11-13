@@ -1,4 +1,4 @@
-include { FLYE } from '../../modules/nf-core/flye/main'
+include { FLYE } from '../../modules/local/flye/main'
 include { ASSEMBLYSTATS } from '../../modules/local/stats/assemblystats'
 include { REFORMATASSEMBLYSTATS as REFORMATASSEMBLYSTATS_NANOPORE } from '../../modules/local/stats/reformatassemblystats'
 include { CIRCULARRECENTER_MIDSTARTFLYE } from '../../modules/local/circularrecenter/midstartflye/main'
@@ -61,7 +61,7 @@ workflow ASSEMBLE_NANOPORE {
 
 
     //Flye to be the best-performing bacterial genome assembler in many metrics
-    if (params.nanopore_reads_assembler == 'flye') {
+    if (params.long_read_assembly == 'flye') {
         long_reads
             .multiMap { it ->
                 long_reads: [it[0], it[1]]

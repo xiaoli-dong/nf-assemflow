@@ -1,16 +1,16 @@
-include { 
+include {
     MINIMAP2_ALIGN as MINIMAP2_ALIGN_DEPTH_ILLUMINA
 } from '../../modules/local/minimap2/align/main'
-include { 
+include {
     SAMTOOLS_SORT as SAMTOOLS_SORT_DEPTH_ILLUMINA
-} from '../../modules/nf-core/samtools/sort/main'
-include { 
-    SAMTOOLS_INDEX as SAMTOOLS_INDEX_DEPTH_ILLUMINA 
-} from '../../modules/nf-core/samtools/index/main'
-include { 
-    SAMTOOLS_COVERAGE as SAMTOOLS_COVERAGE_DEPTH_ILLUMINA 
-} from '../../modules/nf-core/samtools/coverage/main'
-include { 
+} from '../../modules/local/samtools/sort/main'
+include {
+    SAMTOOLS_INDEX as SAMTOOLS_INDEX_DEPTH_ILLUMINA
+} from '../../modules/local/samtools/index/main'
+include {
+    SAMTOOLS_COVERAGE as SAMTOOLS_COVERAGE_DEPTH_ILLUMINA
+} from '../../modules/local/samtools/coverage/main'
+include {
     MAPPINGREPORT as MAPPINGREPORT_ILLUMINA
 } from '../../modules/local/mappingreport'
 
@@ -20,22 +20,22 @@ include {
     CSVTK_CONCAT as CSVTK_CONCAT_STATS_NOT_ASSEMBLED ;
     CSVTK_CONCAT as CSVTK_CONCAT_GTDBTK_ANI_SUMMARY ;
     CSVTK_CONCAT as CSVTK_CONCAT_GTDBTK_ANI_CLOSEST ;
-} from '../../modules/nf-core/csvtk/concat/main'
+} from '../../modules/local/csvtk/concat/main'
 
 
-workflow DEPTH_ILLUMINA {   
+workflow DEPTH_ILLUMINA {
 
     take:
         illumina_reads
         contigs
     main:
-        ch_versions = Channel.empty()
+        ch_versions = channel.empty()
 
         illumina_reads.map{
             meta, reads ->
                 def new_meta = [:]
                 new_meta.id = meta.id
-                [ new_meta, meta, reads ] 
+                [ new_meta, meta, reads ]
 
         }.set{
             ch_input_reads
@@ -45,7 +45,7 @@ workflow DEPTH_ILLUMINA {
             meta, mycontigs ->
                 def new_meta = [:]
                 new_meta.id = meta.id
-                [ new_meta, meta, mycontigs ] 
+                [ new_meta, meta, mycontigs ]
         }.set{
             ch_input_contigs
         }
@@ -82,7 +82,7 @@ workflow DEPTH_ILLUMINA {
         SAMTOOLS_INDEX_DEPTH_ILLUMINA(SAMTOOLS_SORT_DEPTH_ILLUMINA.out.bam)
         SAMTOOLS_COVERAGE_DEPTH_ILLUMINA(SAMTOOLS_SORT_DEPTH_ILLUMINA.out.bam.join(SAMTOOLS_INDEX_DEPTH_ILLUMINA.out.bai))
         ch_versions = ch_versions.mix(SAMTOOLS_COVERAGE_DEPTH_ILLUMINA.out.versions.first())
-        
+
         MAPPINGREPORT_ILLUMINA(SAMTOOLS_COVERAGE_DEPTH_ILLUMINA.out.coverage)
 
         //depth summary report

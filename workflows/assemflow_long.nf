@@ -3,7 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { MULTIQC } from '../modules/nf-core/multiqc/main'
+include { MULTIQC } from '../modules/local/multiqc/main'
 include { paramsSummaryMap } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -13,7 +13,7 @@ include { PUBLISH_ASSEMBLIES } from '../modules/local/publish/assemblies'
 include { PUBLISH_SAMPLESHEET } from '../modules/local/publish/samplesheet'
 include { DEPTH_NANOPORE } from '../subworkflows/local/depth_nanopore'
 include { CHECKM2_PREDICT } from '../modules/local/checkm2/predict.nf'
-include { CSVTK_CONCAT } from '../modules/nf-core/csvtk/concat'
+include { CSVTK_CONCAT } from '../modules/local/csvtk/concat'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -50,12 +50,12 @@ workflow ASSEMFLOW_LONG {
         // Generate samplesheet
         PUBLISH_SAMPLESHEET(
             assemblies_collected
-            //Channel.value([])
-        ) 
-    
+            //channel.value([])
+        )
+
         CSVTK_CONCAT(
-            ASSEMBLE_NANOPORE.out.stats.map { 
-                _meta, mystats -> mystats 
+            ASSEMBLE_NANOPORE.out.stats.map {
+                _meta, mystats -> mystats
             }.collect().map { files -> tuple([id: "assembly_nanopore_stats"], files) },
             'tsv',
             'tsv',

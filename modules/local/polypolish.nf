@@ -2,11 +2,11 @@ process POLYPOLISH {
     tag "$meta.id"
     label 'process_medium'
 
-   
-    conda "bioconda::polypolish=0.6.0"
+
+    conda "bioconda::polypolish=0.6.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/polypolish:0.6.0--hdbdd923_0':
-        'biocontainers/polypolish:0.6.0--hdbdd923_0' }"
+        'https://depot.galaxyproject.org/singularity/polypolish:0.6.1--h3ab6199_0':
+        'biocontainers/polypolish:0.6.1--h3ab6199_0' }"
 
     input:
     tuple val(meta), path(draft_contigs)
@@ -23,7 +23,7 @@ process POLYPOLISH {
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-   
+
     """
     polypolish filter \\
         ${args} \\
@@ -40,7 +40,7 @@ process POLYPOLISH {
         > ${prefix}.fasta
 
     gzip -n ${prefix}.fasta
-    
+
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

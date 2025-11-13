@@ -10,7 +10,7 @@ workflow POLISHER_NANOPORE {
     long_reads
 
     main:
-    ch_software_versions = Channel.empty()
+    ch_software_versions = channel.empty()
     contigs = draft_contigs
 
     if(params.nanopore_reads_polisher == 'medaka'){

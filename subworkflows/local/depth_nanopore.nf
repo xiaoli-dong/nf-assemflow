@@ -1,7 +1,7 @@
 include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_DEPTH_NANOPORE } from '../../modules/local/minimap2/align/main'
-include { SAMTOOLS_SORT as SAMTOOLS_SORT_DEPTH_NANOPORE } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DEPTH_NANOPORE } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_COVERAGE as SAMTOOLS_COVERAGE_DEPTH_NANOPORE } from '../../modules/nf-core/samtools/coverage/main'
+include { SAMTOOLS_SORT as SAMTOOLS_SORT_DEPTH_NANOPORE } from '../../modules/local/samtools/sort/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DEPTH_NANOPORE } from '../../modules/local/samtools/index/main'
+include { SAMTOOLS_COVERAGE as SAMTOOLS_COVERAGE_DEPTH_NANOPORE } from '../../modules/local/samtools/coverage/main'
 include { MAPPINGREPORT as MAPPINGREPORT_NANOPORE } from '../../modules/local/mappingreport'
 include {
     CSVTK_CONCAT as CSVTK_CONCAT_STATS_ASM ;
@@ -9,24 +9,24 @@ include {
     CSVTK_CONCAT as CSVTK_CONCAT_STATS_NOT_ASSEMBLED ;
     CSVTK_CONCAT as CSVTK_CONCAT_GTDBTK_ANI_SUMMARY ;
     CSVTK_CONCAT as CSVTK_CONCAT_GTDBTK_ANI_CLOSEST
-} from '../../modules/nf-core/csvtk/concat'
-workflow DEPTH_NANOPORE {   
+} from '../../modules/local/csvtk/concat'
+workflow DEPTH_NANOPORE {
 
     take:
         nanopore_reads
         contigs
     main:
-        ch_versions = Channel.empty()
-        
+        ch_versions = channel.empty()
+
        /*  contigs.map{
             meta, contigs -> contigs
         }.set{ fasta } */
-        
+
         nanopore_reads.map{
             meta, reads ->
                 def new_meta = [:]
                 new_meta.id = meta.id
-                [ new_meta, meta, reads ] 
+                [ new_meta, meta, reads ]
 
         }.set{
             ch_input_reads
@@ -35,7 +35,7 @@ workflow DEPTH_NANOPORE {
             meta, contigs ->
                 def new_meta = [:]
                 new_meta.id = meta.id
-                [ new_meta, meta, contigs ] 
+                [ new_meta, meta, contigs ]
         }.set{
             ch_input_contigs
         }
@@ -84,6 +84,6 @@ workflow DEPTH_NANOPORE {
         sample_coverage = MAPPINGREPORT_NANOPORE.out.tsv
         depth_report = CSVTK_CONCAT_DEPTH_NANOPORE.out.csv
         versions = ch_versions
-       
+
 
 }

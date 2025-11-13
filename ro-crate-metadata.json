@@ -41,7 +41,7 @@
                     "@id": "modules/"
                 },
                 {
-                    "@id": "modules/nf-core/"
+                    "@id": "modules/local/"
                 },
                 {
                     "@id": "workflows/"
@@ -211,7 +211,7 @@
             "description": "Modules used by the pipeline"
         },
         {
-            "@id": "modules/nf-core/",
+            "@id": "modules/local/",
             "@type": "Dataset",
             "description": "nf-core modules"
         },

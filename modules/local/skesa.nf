@@ -2,11 +2,11 @@ process SKESA {
     tag "$meta.id"
     label 'process_medium'
 
-   
+
     conda "bioconda::skesa=2.5.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/skesa:2.5.1--hdcf5f25_0':
-        'biocontainers/skesa:2.5.1--hdcf5f25_0' }"
+        'https://depot.galaxyproject.org/singularity/skesa:2.5.1--h077b44d_3':
+        'biocontainers/skesa:2.5.1--h077b44d_3' }"
 
     input:
     tuple val(meta), path(reads)
@@ -14,7 +14,7 @@ process SKESA {
     output:
     tuple val(meta), path('*.contigs.fa.gz'), emit: contigs
     path ("versions.yml"), emit: versions
-    
+
     when:
     task.ext.when == null || task.ext.when
 
@@ -27,13 +27,13 @@ process SKESA {
     """
     skesa $args --reads $input_reads --cores $task.cpus --memory $maxmem --contigs_out ${prefix}.contigs.fa >& ${prefix}_skesa.log
     gzip  ${prefix}.contigs.fa
-    
+
     cat <<-END_VERSIONS > versions.yml
     ${task.process}:
         skesa: \$(skesa -v 2>&1 | sed -e 's/^skesa -v//;;s/^SKESA //;' | sed '/^[[:space:]]*\$/d')
     END_VERSIONS
-    
-    
+
+
     """
-    
+
 }

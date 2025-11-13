@@ -1,7 +1,8 @@
-name: bwamem2_index
+name: megahit
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::bwa-mem2=2.2.3
+  - bioconda::megahit=1.2.9
+

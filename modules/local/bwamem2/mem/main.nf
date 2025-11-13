@@ -1,21 +1,21 @@
 process BWAMEM2_MEM {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-e5d375990341c5aef3c9aff74f96f66f65375ef6:6351200f24497efba12c219c2bea4bb0f69a9d47-0' :
-        'biocontainers/mulled-v2-e5d375990341c5aef3c9aff74f96f66f65375ef6:6351200f24497efba12c219c2bea4bb0f69a9d47-0' }"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/bwa-mem2:2.3--he70b90d_0'
+        : 'biocontainers/bwa-mem2:2.3--he70b90d_0'}"
 
     input:
     tuple val(meta), path(reads)
     tuple val(meta2), path(index)
-    val   sort_bam
+    val sort_bam
 
     output:
     tuple val(meta), path("*.sam"), emit: sam, optional: true
     tuple val(meta), path("*.bam"), emit: bam, optional: true
-    path  "versions.yml"          , emit: versions
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,11 +31,11 @@ process BWAMEM2_MEM {
 
     bwa-mem2 \\
         mem \\
-        $args \\
-        -t $task.cpus \\
+        ${args} \\
+        -t ${task.cpus} \\
         \$INDEX \\
-        $reads \\
-        | samtools $samtools_command $args2 -@ $task.cpus -o ${prefix}.${suffix} -
+        ${reads} \\
+        | samtools ${samtools_command} ${args2} -@ ${task.cpus} -o ${prefix}.${suffix} -
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

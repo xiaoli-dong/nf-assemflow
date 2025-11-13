@@ -30,11 +30,11 @@ include { PIPELINE_COMPLETION } from './subworkflows/local/utils_nfcore_assemflo
 workflow ABPROVLAB_ASSEMFLOW {
     take:
     short_reads // channel: samplesheet read in from --input
-    long_reads // channel: 
+    long_reads // channel:
 
     main:
 
-    multiqc_report = Channel.empty()
+    multiqc_report = channel.empty()
     //
     // WORKFLOW: Run pipeline
     //
@@ -52,7 +52,7 @@ workflow ABPROVLAB_ASSEMFLOW {
     }
 
     emit:
-    multiqc_report // channel: /path/to/multiqc_report.html 
+    multiqc_report // channel: /path/to/multiqc_report.html
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
