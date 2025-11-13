@@ -25,28 +25,31 @@ It processes quality-controlled, host-removed paired-end or single-end reads (sh
 - Scalable for local, HPC, or cloud environments  
 ---
 
-## Usage
+## Quick start
 
+### Prepare required samplesheet input
+The nf-assemflow pipeline requires user to provide a csv format samplesheet, which contains the sequenence information for each sample, as input. See below for what the samplesheet looks like:
+
+```samplesheet.csv```
+
+```
+sample,fastq_1,fastq_2,long_fastq,basecaller_mode
+sample1,shortreads_1.fastq.gz,shortreads_2.fastq.gz,longreads.fastq.gz,r1041_e82_400bps_hac_v4.2.0
+sample2,shortreads.fastq,NA,longreads.fastq.gz,r1041_e82_400bps_sup_v4.2.0
+sample3,NA,NA,longreads.fastq.gz,NA
+sample4,shortreads_1.fastq.gz,shortreads_2.fastq.gz,NA
+```
+The csv format samplesheet has five required columns:
+* The first row of the csv file is the header describing the columns
+* Each row represents a unique sample to be processed, the first colum is the unique sample id
+* When the information for a particular column is missing, please fill the column with "NA"
+* The "fastq_1" and "fastq_2" columns are reserved for supplying the short sequence files
+* "basecaller_mode" is for user to provide medaka inference model
+* 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
-First, prepare a samplesheet with your input data that looks as follows:
-
-`samplesheet.csv`:
-
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-```
-
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
-
-Now, you can run the pipeline using:
+##### Run the pipeline:
 
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
