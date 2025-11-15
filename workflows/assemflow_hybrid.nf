@@ -8,12 +8,16 @@ include { paramsSummaryMap } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_assemflow_pipeline'
-include { ASSEMBLE_HYBRID } from '../subworkflows/local/assembly_long'
+include { ASSEMBLE_HYBRID } from '../subworkflows/local/assembly_nanopore'
 include { PUBLISH_ASSEMBLIES } from '../modules/local/publish/assemblies'
 include { PUBLISH_SAMPLESHEET } from '../modules/local/publish/samplesheet'
 include { DEPTH_ILLUMINA } from '../subworkflows/local/depth_illumina'
 include { DEPTH_NANOPORE } from '../subworkflows/local/depth_nanopore'
 include { CSVTK_CONCAT } from '../modules/local/csvtk/concat'
+
+include { ASSEMBLYSTATS } from '../modules/local/stats/assemblystats'
+include { REFORMATASSEMBLYSTATS as REFORMATASSEMBLYSTATS_NANOPORE } from '../modules/local/stats/reformatassemblystats'
+include { FASTA_REFORMATHEADER } from '../modules/local/fasta/reformatheader'
 //
 // modules
 //
@@ -57,8 +61,17 @@ workflow ASSEMFLOW_HYBRID {
         ch_versions = ch_versions.mix(ASSEMBLE_HYBRID.out.versions)
 
 
+        FASTA_REFORMATHEADER(contigs)
+        contigs = FASTA_REFORMATHEADER.out.fasta
+        contigs.view()
+        ASSEMBLYSTATS(contigs)
+        ch_software_versions = ch_versions.mix(ASSEMBLYSTATS.out.versions.first())
+        REFORMATASSEMBLYSTATS_NANOPORE(ASSEMBLYSTATS.out.stats)
+        ch_software_versions = ch_software_versions.mix(REFORMATASSEMBLYSTATS_NANOPORE.out.versions.first())
+        stats = REFORMATASSEMBLYSTATS_NANOPORE.out.tsv
+
         CSVTK_CONCAT(
-            ASSEMBLE_HYBRID.out.stats.map { _meta, mystats -> mystats }.collect().map { files -> tuple([id: "assembly_hybrid_stats"], files) },
+            stats.map { _meta, mystats -> mystats }.collect().map { files -> tuple([id: "assembly_hybrid_stats"], files) },
             'tsv',
             'tsv',
         )

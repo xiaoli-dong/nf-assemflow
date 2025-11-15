@@ -1,14 +1,15 @@
 include { FLYE } from '../../modules/local/flye/main'
-include { ASSEMBLYSTATS } from '../../modules/local/stats/assemblystats'
-include { REFORMATASSEMBLYSTATS as REFORMATASSEMBLYSTATS_NANOPORE } from '../../modules/local/stats/reformatassemblystats'
+
 include { CIRCULARRECENTER_MIDSTARTFLYE } from '../../modules/local/circularrecenter/midstartflye/main'
 include { CIRCULARRECENTER_DNAAPLER } from '../../modules/local/circularrecenter/dnaapler/main.nf'
 include { GFATOOLS_GFA2FA  } from '../../modules/local/gfatools/gfa2fa/main.nf'
 include { POLISHER_NANOPORE } from '../../subworkflows/local/polisher_nanopore'
 include { POLISHER_ILLUMINA } from '../../subworkflows/local/polisher_illumina'
-include { FASTA_REFORMATHEADER } from '../../modules/local/fasta/reformatheader'
+
 include { LRGE } from '../../modules/local/lrge/main'
 include { RASUSA_READS } from '../../modules/local/rasusa/reads/main'
+
+
 
 workflow ASSEMBLE_HYBRID {
     take:
@@ -18,24 +19,20 @@ workflow ASSEMBLE_HYBRID {
     main:
     ch_software_versions = channel.empty()
     contigs = channel.empty()
-    stats = channel.empty()
-    //assembly_report = channel.empty()
-
     ASSEMBLE_NANOPORE(long_reads)
     contigs = ASSEMBLE_NANOPORE.out.contigs.filter { meta, mycontigs -> mycontigs.countFasta() > 0 }
-    stats = ASSEMBLE_NANOPORE.out.stats
+
     ch_software_versions = ch_software_versions.mix(ASSEMBLE_NANOPORE.out.versions)
 
     if (params.platform == 'hybrid' & !params.skip_illumina_reads_polish) {
         POLISHER_ILLUMINA(contigs, short_reads)
         ch_software_versions = ch_software_versions.mix(POLISHER_ILLUMINA.out.versions)
         contigs = POLISHER_ILLUMINA.out.contigs
-        stats = POLISHER_ILLUMINA.out.stats
+
     }
 
     emit:
     contigs
-    stats
     versions = ch_software_versions
 }
 
@@ -48,7 +45,6 @@ workflow ASSEMBLE_NANOPORE {
     main:
     ch_software_versions = channel.empty()
     contigs = channel.empty()
-    stats = channel.empty()
     assembly_info = channel.empty()
 
     //estimate genome size first
@@ -62,14 +58,9 @@ workflow ASSEMBLE_NANOPORE {
 
     //Flye to be the best-performing bacterial genome assembler in many metrics
     if (params.long_read_assembly == 'flye') {
-        long_reads
-            .multiMap { it ->
-                long_reads: [it[0], it[1]]
-                mode: it[0].basecaller_mode =~ 'r941' ? "--nano-raw" : "--nano-hq"
-            }
-            .set { ch_long_input }
-        //input.modeFlag.view()
-        FLYE(ch_long_input.long_reads, ch_long_input.mode)
+
+        long_reads.join(LRGE.out.gsize).view()
+        FLYE(long_reads.join(LRGE.out.gsize))
         FLYE.out.fasta.filter { _meta, fasta -> fasta.countFasta() > 0 }.set { contigs }
         FLYE.out.txt.filter { _meta, txt -> txt.countLines() > 0 }.set { assembly_info }
         gfa = FLYE.out.gfa
@@ -105,22 +96,10 @@ workflow ASSEMBLE_NANOPORE {
         POLISHER_NANOPORE(contigs, long_reads)
         ch_software_versions = ch_software_versions.mix(POLISHER_NANOPORE.out.versions)
         contigs = POLISHER_NANOPORE.out.contigs
-        stats = POLISHER_NANOPORE.out.stats
+
     }
-
-    FASTA_REFORMATHEADER(contigs)
-    contigs = FASTA_REFORMATHEADER.out.fasta
-
-    contigs.view()
-
-    ASSEMBLYSTATS(contigs)
-    ch_software_versions = ch_software_versions.mix(ASSEMBLYSTATS.out.versions.first())
-    REFORMATASSEMBLYSTATS_NANOPORE(ASSEMBLYSTATS.out.stats)
-    ch_software_versions = ch_software_versions.mix(REFORMATASSEMBLYSTATS_NANOPORE.out.versions.first())
-    stats = REFORMATASSEMBLYSTATS_NANOPORE.out.tsv
 
     emit:
     contigs
-    stats
     versions = ch_software_versions
 }

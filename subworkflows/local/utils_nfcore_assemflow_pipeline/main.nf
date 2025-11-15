@@ -35,15 +35,13 @@ def parse_samplesheet(samplesheet_path) {
             def fastq_1 = fields[1] == 'NA' ? null : fields[1]
             def fastq_2 = fields[2] == 'NA' ? null : fields[2]
             def long_fastq = fields[3] == 'NA' ? null : fields[3]
-            def basecaller_mode = fields[4] == 'NA' ? null : fields[4]
 
             samples.add(
                 [
                     sample: sample_id,
                     fastq_1: fastq_1,
                     fastq_2: fastq_2,
-                    long_fastq: long_fastq,
-                    basecaller_mode: basecaller_mode,
+                    long_fastq: long_fastq
                 ]
             )
         }
@@ -122,8 +120,7 @@ workflow PIPELINE_INITIALISATION {
                 sample: row.sample,
                 fastq_1: row.fastq_1 == 'NA' ? null : row.fastq_1,
                 fastq_2: row.fastq_2 == 'NA' ? null : row.fastq_2,
-                long_fastq: row.long_fastq == 'NA' ? null : row.long_fastq,
-                basecaller_mode: row.basecaller_mode == 'NA' ? null : row.basecaller_mode,
+                long_fastq: row.long_fastq == 'NA' ? null : row.long_fastq
             ]
         }
         .filter { it != null }
@@ -148,8 +145,7 @@ workflow PIPELINE_INITIALISATION {
         .map { row ->
             def meta = [
                 id: row.sample,
-                single_end: true,
-                basecaller_mode: row.basecaller_mode,
+                single_end: true
             ]
             tuple(meta, file(row.long_fastq))
         }

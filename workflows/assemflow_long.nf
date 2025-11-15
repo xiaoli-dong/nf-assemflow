@@ -8,12 +8,16 @@ include { paramsSummaryMap } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_assemflow_pipeline'
-include { ASSEMBLE_NANOPORE } from '../subworkflows/local/assembly_long'
+include { ASSEMBLE_NANOPORE } from '../subworkflows/local/assembly_nanopore'
 include { PUBLISH_ASSEMBLIES } from '../modules/local/publish/assemblies'
 include { PUBLISH_SAMPLESHEET } from '../modules/local/publish/samplesheet'
 include { DEPTH_NANOPORE } from '../subworkflows/local/depth_nanopore'
 include { CHECKM2_PREDICT } from '../modules/local/checkm2/predict.nf'
 include { CSVTK_CONCAT } from '../modules/local/csvtk/concat'
+
+include { ASSEMBLYSTATS } from '../modules/local/stats/assemblystats'
+include { REFORMATASSEMBLYSTATS as REFORMATASSEMBLYSTATS_NANOPORE } from '../modules/local/stats/reformatassemblystats'
+include { FASTA_REFORMATHEADER } from '../modules/local/fasta/reformatheader'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -44,6 +48,25 @@ workflow ASSEMFLOW_LONG {
         contigs = ASSEMBLE_NANOPORE.out.contigs.filter { _meta, contigs -> contigs.countFasta() > 0 }
         ch_versions = ch_versions.mix(ASSEMBLE_NANOPORE.out.versions)
         //stats = ASSEMBLE_NANOPORE.out.stats
+        FASTA_REFORMATHEADER(contigs)
+        contigs = FASTA_REFORMATHEADER.out.fasta
+        contigs.view()
+        ASSEMBLYSTATS(contigs)
+        ch_software_versions = ch_versions.mix(ASSEMBLYSTATS.out.versions.first())
+        REFORMATASSEMBLYSTATS_NANOPORE(ASSEMBLYSTATS.out.stats)
+        ch_software_versions = ch_software_versions.mix(REFORMATASSEMBLYSTATS_NANOPORE.out.versions.first())
+        stats = REFORMATASSEMBLYSTATS_NANOPORE.out.tsv
+
+
+        CSVTK_CONCAT(
+            stats.map {
+                _meta, mystats -> mystats
+            }.collect().map { files -> tuple([id: "assembly_nanopore_stats"], files) },
+            'tsv',
+            'tsv',
+        )
+
+
         PUBLISH_ASSEMBLIES(contigs)
         assemblies_collected = PUBLISH_ASSEMBLIES.out.contigs.collect().ifEmpty([]).map { it.collate(2) }
         assemblies_collected.view()
@@ -51,14 +74,6 @@ workflow ASSEMFLOW_LONG {
         PUBLISH_SAMPLESHEET(
             assemblies_collected
             //channel.value([])
-        )
-
-        CSVTK_CONCAT(
-            ASSEMBLE_NANOPORE.out.stats.map {
-                _meta, mystats -> mystats
-            }.collect().map { files -> tuple([id: "assembly_nanopore_stats"], files) },
-            'tsv',
-            'tsv',
         )
 
         if (!params.skip_depth_and_coverage_nanopore) {

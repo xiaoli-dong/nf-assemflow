@@ -8,34 +8,42 @@ process FLYE {
         'biocontainers/flye%3A2.9.6--py39h475c85d_0' }"
 
     input:
-    tuple val(meta), path(reads)
-    val mode
+    tuple val(meta), path(reads), path(gsize)
 
     output:
     tuple val(meta), path("*.fasta.gz"), emit: fasta
-    tuple val(meta), path("*.gfa.gz")  , emit: gfa
-    tuple val(meta), path("*.gv.gz")   , emit: gv
-    tuple val(meta), path("*.txt")     , emit: txt
-    tuple val(meta), path("*.log")     , emit: log
-    tuple val(meta), path("*.json")    , emit: json
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path("*.gfa.gz"), emit: gfa
+    tuple val(meta), path("*.gv.gz"), emit: gv
+    tuple val(meta), path("*.txt"), emit: txt
+    tuple val(meta), path("*.log"), emit: log
+    tuple val(meta), path("*.json"), emit: json
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def valid_mode = ["--pacbio-raw", "--pacbio-corr", "--pacbio-hifi", "--nano-raw", "--nano-corr", "--nano-hq"]
-    if ( !valid_mode.contains(mode) )  { error "Unrecognised mode to run Flye. Options: ${valid_mode.join(', ')}" }
+
+    // Run Flye with the converted genome size
     """
-    flye \\
-        $mode \\
+    # Read the genome size from the gsize file (base pairs)
+    genome_size=\$(cat ${gsize})
+
+    # Convert genome size from base pairs (bp) to megabases (Mb)
+    genome_size_in_m=\$((genome_size / 1000000))  # Convert to Mb
+
+    # Use megabases (Mb) for Flye (uncomment if you want to use Gb instead)
+    final_genome_size=\${genome_size_in_m}m
+
+    flye $args \\
         $reads \\
         --out-dir . \\
-        --threads \\
-        $task.cpus \\
-        $args
+        --threads $task.cpus \\
+        --genome-size \${final_genome_size} \\
+        $args2 > flye.log 2>&1
 
     gzip -c assembly.fasta > ${prefix}.assembly.fasta.gz
     gzip -c assembly_graph.gfa > ${prefix}.assembly_graph.gfa.gz
@@ -46,7 +54,7 @@ process FLYE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        flye: \$( flye --version )
+        flye: \$(flye --version)
     END_VERSIONS
     """
 
@@ -62,7 +70,7 @@ process FLYE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        flye: \$( flye --version )
+        flye: \$(flye --version)
     END_VERSIONS
     """
 }
